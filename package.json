@@ -4,11 +4,20 @@
   "type": "module",
   "scripts": {
     "start": "bun src/index.ts",
-    "run-docker": "docker-compose up -d --build"
+    "run-docker": "docker-compose up -d --build",
+    "fix-lint": "eslint --fix"
   },
   "devDependencies": {
+    "@eslint/js": "^9.37.0",
+    "@eslint/json": "^0.13.2",
     "@types/bun": "latest",
-    "@types/pg": "^8.11.8"
+    "@types/pg": "^8.11.8",
+    "eslint": "^9.37.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "globals": "^16.4.0",
+    "prettier": "^3.6.2",
+    "typescript-eslint": "^8.46.0"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
