@@ -39,7 +39,7 @@ describe("CreateBlockUsecase", () => {
     isLocked: mock(async () => false),
   };
 
-  const validDto = {
+  const validDTO = {
     id: "a7d9b2e0", // A valid hash for the data below
     height: 1,
     transactions: [
@@ -81,10 +81,10 @@ describe("CreateBlockUsecase", () => {
       mockRollbackLock,
     );
 
-    const result = await usecase.execute(validDto);
+    const result = await usecase.execute(validDTO);
 
-    expect(result.id).toBe(validDto.id);
-    expect(result.height).toBe(validDto.height);
+    expect(result.id).toBe(validDTO.id);
+    expect(result.height).toBe(validDTO.height);
     expect(mockBlockRepo.save).toHaveBeenCalled();
     expect(mockTransactionRepo.saveMany).toHaveBeenCalled();
   });
@@ -102,7 +102,7 @@ describe("CreateBlockUsecase", () => {
       lockedRollbackMock,
     );
 
-    await expect(usecase.execute(validDto)).rejects.toThrow(
+    await expect(usecase.execute(validDTO)).rejects.toThrow(
       new UsecaseError("ROLLBACK_IN_PROGRESS", "Chain is being rolled back"),
     );
   });
@@ -115,12 +115,12 @@ describe("CreateBlockUsecase", () => {
       mockDbTransactionManager,
       mockRollbackLock,
     );
-    const dtoWithNoInputs = {
-      ...validDto,
+    const DTOWithNoInputs = {
+      ...validDTO,
       transactions: [{ id: "tx1", inputs: [], outputs: [] }],
     };
 
-    await expect(usecase.execute(dtoWithNoInputs)).rejects.toThrow(
+    await expect(usecase.execute(DTOWithNoInputs)).rejects.toThrow(
       new UsecaseError(
         "MIN_ONE_INPUT_TRANSACTION",
         "Min one input transaction is required",
@@ -142,7 +142,7 @@ describe("CreateBlockUsecase", () => {
       mockRollbackLock,
     );
 
-    await expect(usecase.execute(validDto)).rejects.toThrow(
+    await expect(usecase.execute(validDTO)).rejects.toThrow(
       new UsecaseError(
         "INVALID_BLOCK_SIGNATURE",
         "Invalid block, computed hash: wrong_hash",
@@ -164,7 +164,7 @@ describe("CreateBlockUsecase", () => {
       mockRollbackLock,
     );
 
-    await expect(usecase.execute(validDto)).rejects.toThrow(
+    await expect(usecase.execute(validDTO)).rejects.toThrow(
       new UsecaseError("INVALID_HEIGHT", "Invalid height, current height: 1"),
     );
   });
@@ -177,7 +177,7 @@ describe("CreateBlockUsecase", () => {
     checkHeightSpy.mockResolvedValue({ isValid: true, currentHeight: 0 });
 
     const invalidDTO = {
-      ...validDto,
+      ...validDTO,
       transactions: [
         {
           id: "tx2",
@@ -225,7 +225,7 @@ describe("CreateBlockUsecase", () => {
       mockRollbackLock,
     );
 
-    await expect(usecase.execute(validDto)).rejects.toThrow(
+    await expect(usecase.execute(validDTO)).rejects.toThrow(
       new UsecaseError("TRANSACTION_INPUT_NOT_VALID", "Invalid transactions"),
     );
   });
