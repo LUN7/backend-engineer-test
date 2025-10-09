@@ -1,3 +1,4 @@
+import Decimal from "decimal.js";
 import type { TransactionEntity } from "../../domain/transaction.do";
 import type { IUnspentOutputRepo } from "../../repo/unspentOutputRepo/unspentOutputRepo.interface";
 import type { ITransactionValidator } from "./transactionValidator.interface";
@@ -23,17 +24,17 @@ export class TransactionValidator implements ITransactionValidator {
       };
     }
 
-    let unspentBalance = 0;
+    let unspentBalance = new Decimal(0);
     unspentOutputs.forEach((output) => {
-      unspentBalance += output.value;
+      unspentBalance = unspentBalance.plus(new Decimal(output.value));
     });
 
-    let toSpendBalance = 0;
+    let toSpendBalance = new Decimal(0);
     transaction.outputs.forEach((output) => {
-      toSpendBalance += output.value;
+      toSpendBalance = toSpendBalance.plus(new Decimal(output.value));
     });
 
-    const isBalanceEqual = unspentBalance === toSpendBalance;
+    const isBalanceEqual = unspentBalance.equals(toSpendBalance);
     return {
       isValid: isBalanceEqual,
       ...(isBalanceEqual

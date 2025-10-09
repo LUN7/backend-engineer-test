@@ -1,3 +1,4 @@
+import { logger } from "../infra/logger";
 import type { ITransactionValidator } from "../service/transactionValidator/transactionValidator.interface";
 import { Entity } from "../shared/domain/domain";
 import { InputVO } from "./input.do";
@@ -19,6 +20,12 @@ export class TransactionEntity extends Entity {
     TransactionValidator: ITransactionValidator,
   ): Promise<boolean> {
     const result = await TransactionValidator.validateTransaction(this);
+    if (!result.isValid) {
+      logger.debug(
+        result,
+        "[TransactionEntity] validateTransaction: Transaction is invalid",
+      );
+    }
     return result.isValid;
   }
 
