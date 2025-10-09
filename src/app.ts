@@ -163,15 +163,6 @@ export class App {
     this.fastifyInstance.get("/health", async (_, reply) => {
       reply.status(200).send("OK");
     });
-
-    this.fastifyInstance.post("/sql", async (request, reply) => {
-      const { query } = request.body as { query: string };
-
-      const pool = await Postgress.PoolSingleton.getPool();
-      const result = await pool.query(query as string);
-
-      reply.send(result);
-    });
   }
 
   async start() {
