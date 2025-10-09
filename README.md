@@ -1,3 +1,89 @@
+# How to run this code
+
+### Install dependencies
+
+```bash
+bun install
+```
+
+### Start the server
+
+```bash
+bun run-docker
+```
+
+### Attach tty to the server
+
+```bash
+bun attach-log-docker
+```
+
+### Run the tests
+
+> Please stop the running server before running the tests
+
+```bash
+bun test:unit
+```
+
+```bash
+bun test:e2e
+```
+
+### Postman Collection
+
+You can find the postman collection in the root folder, and import it to your postman.
+
+# Side notes
+
+### Setting up the codebase
+
+- Start this challenge with minimal set up prettier and eslint to help me keep the code consistent.
+
+### Some decision to make
+
+- I will try to finish the challenge with a lean DDD architecture, skipping a trade-off analysis and focus on a good enough structure for review and testability...
+- I am going with Postgres, which I am NOT an expert in SQL, but I think it is a good time for me to practice and know more...
+
+### Researching...
+
+- focusing on the behaviour, thus, researching more on UTXO model...
+
+### Drafting...
+
+###### /POST BLOCK API
+
+- Let's starting diving deep into the POST block API...
+- Client will provide a Block which contains Transactions, Inputs & Outputs
+- Construct the Domain Object, then validate the block and transaction...
+- Add a Domain Service, TransactionValidator, to validate the transaction...
+- hit a wall, and researching on how to check if output is valid to spend...
+- learnt a concept from internet, (Unspent Transaction Output)
+- Now, focus on finishing the rest....
+
+### Testing
+
+- So it has been couple of hours since I started this challenge, and I had really focusing on the code, so at this point of moment, I already finished the code. So I am going to write some tests...
+
+###### Unit Tests
+
+- Added unit tests for the domain objects, services
+- At this challenge, I am not going to test the DB (repo) layer, and normally, if I use ORM, I will test only when the query is complicated, for example, running some pipeline across multiple entities and have some aggregation logic...
+- And for this challenge, I do think there could be test for the repo, as I only use the node-postgres and raw query to query the DB, which is quite error prone, but given the time constraint, I will skip it...
+
+###### E2E Tests
+
+- On the other hand, I added some e2e tests for the api, mainly to cover the happy path, some edge cases and some common error cases.
+- As im not very familiar with bun, so I use the most straight forward way to run the e2e, which I started a server and use bun test suit against the native fetch API.
+- Thus, the e2e is configured to run in parallel, which you can see in the docker-compose.test-e2e.yaml file.
+
+### Summary
+
+- In summary, this challenge is finished with a lean DDD architecture. Most of the class implement an interface, for the sake of testability, and decoupled from the implementation details. And the instance class is injected manually in the app.ts file.
+- So, as I said, I am not an expert in SQL, so I do take some times on researching internet, and try my best to make sure the schema design, query, is as good as I could.
+- For simplicity, I use the schema in fastify to validate the request, and assuming all data in the DB will be inserted by this Application, thus, there is no extra validation when data is pull from the DB.
+- If I have to make this code production ready, the first thing I would do is to perform some load testing, concurrent write testing, and also some stress testing to make sure the code and query is scalable and reliable.
+
 # EMURGO Backend Engineer Challenge
 
 This challenge is designed to evaluate your skills with data processing and API development. You will be responsible for creating an indexer that will keep track of the balance of each address in a blockchain.
