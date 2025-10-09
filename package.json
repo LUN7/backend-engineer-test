@@ -5,6 +5,8 @@
   "scripts": {
     "start": "bun src/index.ts",
     "run-docker": "docker-compose up -d --build",
+    "run-docker-e2e": "docker-compose -f docker-compose.test-e2e.yaml up --build --abort-on-container-exit",
+    "attach-log-docker": "docker-compose attach api",
     "fix-lint": "eslint --fix"
   },
   "devDependencies": {

@@ -7,18 +7,19 @@ services:
       POSTGRES_USER: myuser
       POSTGRES_PASSWORD: mypassword
       POSTGRES_DB: mydatabase
-    volumes:
-      - db_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
 
-  api:
+  api-test:
     build: .
     depends_on:
       - db
     environment:
+      NODE_ENV: test
       DATABASE_URL: postgres://myuser:mypassword@db:5432/mydatabase
-    ports:
-      - "3000:3000"
+    command: >
+      sh -c "bun test spec/e2e/happy-jounery.spec.ts &&
+             bun test spec/e2e/create-block.spec.ts &&
+             bun test spec/e2e/rollback.spec.ts"
 volumes:
   db_data:
