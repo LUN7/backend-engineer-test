@@ -6,8 +6,9 @@ async function bootstrap() {
   logger.info("[bootstrap] Bootstrapping...");
   const pool = await Postgress.PoolSingleton.getPool();
 
-  logger.info("[bootstrap] dropping all tables...");
-  await Postgress.dropAllTables(pool);
+  // !!Caution: Lazy drop all tables, use with caution
+  // logger.info("[bootstrap] dropping all tables...");
+  // await Postgress.dropAllTables(pool);
 
   logger.info("[bootstrap] initialize table...");
   await Postgress.initTables(pool);
