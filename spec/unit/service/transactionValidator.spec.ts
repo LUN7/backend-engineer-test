@@ -94,4 +94,34 @@ describe("TransactionValidator", () => {
     const result = await transactionValidator.validateTransaction(transaction);
     expect(result.isValid).toBe(true);
   });
+
+  it("should handle floating point precision issue", async () => {
+    const mockUnspentOutputRepo: IUnspentOutputRepo = {
+      getManyFromTxAndIndexPairs: mock(async () => [
+        { txId: "tx0", index: 0, address: "addr1", value: 0.3 },
+      ]),
+      getManyFromAddress: mock(async () => []),
+    };
+
+    const transactionValidator = new TransactionValidator(
+      mockUnspentOutputRepo,
+    );
+
+    const transaction = TransactionEntity.create("tx1", {
+      inputs: [InputVO.create({ txId: "tx0", index: 0 })],
+      outputs: [
+        OutputVO.create({
+          address: "addr2",
+          value: 0.1,
+        }),
+        OutputVO.create({
+          address: "addr3",
+          value: 0.2,
+        }),
+      ],
+    });
+
+    const result = await transactionValidator.validateTransaction(transaction);
+    expect(result.isValid).toBe(true);
+  });
 });
