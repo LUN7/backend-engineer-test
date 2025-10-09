@@ -80,15 +80,19 @@ export class CreateBlockUsecase {
         );
       }
 
-      // TODO: validate if no input is the same across the transactions
-
       const areAllTransactionsValid = await Promise.all(
         transactions.map((transaction) =>
           transaction.validateTransaction(this.transactionValidator),
         ),
       );
 
-      if (!areAllTransactionsValid.every((isValid) => isValid)) {
+      const validateAllInputsUniqueResult =
+        block.validateInputUniqueAcrossTransactions();
+
+      if (
+        !areAllTransactionsValid.every((isValid) => isValid) ||
+        !validateAllInputsUniqueResult.isValid
+      ) {
         throw new UsecaseError(
           CREATE_BLOCK_ERROR_CODES.INVALID_TRANSACTIONS,
           "Invalid transactions",

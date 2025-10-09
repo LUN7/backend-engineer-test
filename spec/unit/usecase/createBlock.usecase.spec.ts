@@ -169,6 +169,42 @@ describe("CreateBlockUsecase", () => {
     );
   });
 
+  it("should throw an error if same input is used across transactions", async () => {
+    validateBlockSignatureSpy.mockReturnValue({
+      isValid: true,
+      computedHash: "",
+    });
+    checkHeightSpy.mockResolvedValue({ isValid: true, currentHeight: 0 });
+
+    const invalidDTO = {
+      ...validDto,
+      transactions: [
+        {
+          id: "tx2",
+          inputs: [{ index: 0, txId: "tx2" }],
+          outputs: [{ address: "addr1", value: 10 }],
+        },
+        {
+          id: "tx3",
+          inputs: [{ index: 0, txId: "tx2" }],
+          outputs: [{ address: "addr2", value: 10 }],
+        },
+      ],
+    };
+
+    const usecase = new CreateBlockUsecase(
+      mockTransactionValidator,
+      mockTransactionRepo,
+      mockBlockRepo,
+      mockDbTransactionManager,
+      mockRollbackLock,
+    );
+
+    await expect(usecase.execute(invalidDTO)).rejects.toThrow(
+      new UsecaseError("TRANSACTION_INPUT_NOT_VALID", "Invalid transactions"),
+    );
+  });
+
   it("should throw an error if any transaction is invalid", async () => {
     validateBlockSignatureSpy.mockReturnValue({
       isValid: true,

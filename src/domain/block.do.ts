@@ -49,6 +49,21 @@ export class BlockAggregateRoot extends AggregateRoot {
     };
   }
 
+  public validateInputUniqueAcrossTransactions(): {
+    isValid: boolean;
+  } {
+    const inputs = this.transactions.flatMap(
+      (transaction) => transaction.inputs,
+    );
+    return {
+      isValid: inputs.every(
+        (input) =>
+          inputs.filter((i) => i.txId === input.txId && i.index === input.index)
+            .length === 1,
+      ),
+    };
+  }
+
   public static create(
     id: string,
     props: { height: number; transactions?: TransactionEntity[] },
