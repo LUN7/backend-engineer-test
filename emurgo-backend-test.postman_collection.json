@@ -1,0 +1,500 @@
+{
+	"info": {
+		"_postman_id": "a052c7e7-7626-4799-ac91-1de9549a7266",
+		"name": "emurgo-backend-test",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "12168887"
+	},
+	"item": [
+		{
+			"name": "health check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/health",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"health"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create block",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const txId = pm.variables.replaceIn('{{$randomUUID}}');",
+							"const height = pm.variables.get('height') ;",
+							"const blockString = `${height}|${txId}`;",
+							"",
+							"const blockId = CryptoJS.SHA256(blockString).toString();",
+							"",
+							"pm.environment.set('txId', txId);",
+							"pm.environment.set('blockId', blockId);",
+							"",
+							"console.log('Block String:', blockString);",
+							"console.log('Computed Block ID:', blockId);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": \"{{blockId}}\",\n    \"height\": {{height}},\n    \"transactions\": [{\n        \"id\": \"{{txId}}\",\n        \"inputs\": [{\n            \"txId\": \"1\",\n            \"index\": 0\n        }],\n        \"outputs\": [{\n            \"address\": \"0x002\",\n            \"value\": 90000\n        }, {\n            \"address\": \"0x001\",\n            \"value\": 10000\n        }]\n    }]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/blocks",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"blocks"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "create block - success",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"{{blockId}}\",\n    \"height\": {{height}},\n    \"transactions\": [{\n        \"id\": \"{{txId}}\",\n        \"inputs\": [{\n            \"txId\": \"1\",\n            \"index\": 0\n        }],\n        \"outputs\": [{\n            \"address\": \"0x002\",\n            \"value\": 90000\n        }, {\n            \"address\": \"0x001\",\n            \"value\": 10000\n        }]\n    }]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/blocks",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"blocks"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": null,
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 09 Oct 2025 04:53:19 GMT"
+						},
+						{
+							"key": "Content-Length",
+							"value": "261"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"id\": \"30839183dea69c7fea460e0bafa277334ede816996ab5783eacc95ee5b69496a\",\n    \"height\": 2,\n    \"transactions\": [\n        {\n            \"id\": \"32aa1db0-e6a1-4fee-8c0a-a87bde7ae5fd\",\n            \"inputs\": [\n                {\n                    \"txId\": \"1\",\n                    \"index\": 0\n                }\n            ],\n            \"outputs\": [\n                {\n                    \"address\": \"0x002\",\n                    \"value\": 90000\n                },\n                {\n                    \"address\": \"0x001\",\n                    \"value\": 10000\n                }\n            ]\n        }\n    ]\n}"
+				},
+				{
+					"name": "create block - validation fail",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"{{blockId}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/blocks",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"blocks"
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": null,
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 09 Oct 2025 04:51:31 GMT"
+						},
+						{
+							"key": "Content-Length",
+							"value": "122"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"statusCode\": 400,\n    \"code\": \"FST_ERR_VALIDATION\",\n    \"error\": \"Bad Request\",\n    \"message\": \"body must have required property 'height'\"\n}"
+				},
+				{
+					"name": "create block - invalid block height",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"{{blockId}}\",\n    \"height\": {{height}},\n    \"transactions\": [{\n        \"id\": \"{{txId}}\",\n        \"inputs\": [{\n            \"txId\": \"1\",\n            \"index\": 0\n        }],\n        \"outputs\": [{\n            \"address\": \"0x002\",\n            \"value\": 90000\n        }, {\n            \"address\": \"0x001\",\n            \"value\": 10000\n        }]\n    }]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/blocks",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"blocks"
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": null,
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 09 Oct 2025 04:52:57 GMT"
+						},
+						{
+							"key": "Content-Length",
+							"value": "56"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"code\": \"INVALID_HEIGHT\",\n    \"error\": \"Invalid block height\"\n}"
+				},
+				{
+					"name": "create block - invalid signature",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"{{blockId}}x\",\n    \"height\": {{height}},\n    \"transactions\": [{\n        \"id\": \"{{txId}}\",\n        \"inputs\": [{\n            \"txId\": \"1\",\n            \"index\": 0\n        }],\n        \"outputs\": [{\n            \"address\": \"0x002\",\n            \"value\": 90000\n        }, {\n            \"address\": \"0x001\",\n            \"value\": 10000\n        }]\n    }]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/blocks",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"blocks"
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": null,
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 09 Oct 2025 04:54:01 GMT"
+						},
+						{
+							"key": "Content-Length",
+							"value": "68"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"code\": \"INVALID_BLOCK_SIGNATURE\",\n    \"error\": \"Invalid block signature\"\n}"
+				},
+				{
+					"name": "create block - dup input",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"{{blockId}}\",\n    \"height\": {{height}},\n    \"transactions\": [\n        {\n            \"id\": \"{{txId}}\",\n            \"inputs\": [\n                {\n                    \"txId\": \"1aea1e34-7a33-4e68-9d38-5fbc2d61ce5a\",\n                    \"index\": 1\n                },\n                {\n                    \"txId\": \"1aea1e34-7a33-4e68-9d38-5fbc2d61ce5a\",\n                    \"index\": 1\n                }\n            ],\n            \"outputs\": [\n                {\n                    \"address\": \"0x011\",\n                    \"value\": 40000\n                },\n                {\n                    \"address\": \"0x010\",\n                    \"value\": 10000\n                }\n            ]\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/blocks",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"blocks"
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": null,
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 09 Oct 2025 04:57:00 GMT"
+						},
+						{
+							"key": "Content-Length",
+							"value": "103"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"code\": \"INVALID_TRANSACTIONS\",\n    \"error\": \"Invalid transactions, sum of inputs and outputs are not equal\"\n}"
+				}
+			]
+		},
+		{
+			"name": "address balance",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/balance/:address",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"balance",
+						":address"
+					],
+					"variable": [
+						{
+							"key": "address",
+							"value": "0x002"
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "address balance - success",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/balance/:address",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"balance",
+								":address"
+							],
+							"variable": [
+								{
+									"key": "address",
+									"value": "0x002"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": null,
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 09 Oct 2025 04:54:57 GMT"
+						},
+						{
+							"key": "Content-Length",
+							"value": "137"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"address\": \"0x002\",\n    \"balance\": 90000,\n    \"outputs\": [\n        {\n            \"address\": \"0x002\",\n            \"value\": 90000,\n            \"txId\": \"32aa1db0-e6a1-4fee-8c0a-a87bde7ae5fd\",\n            \"index\": 0\n        }\n    ]\n}"
+				}
+			]
+		},
+		{
+			"name": "Rollback",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/rollback?height=1",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"rollback"
+					],
+					"query": [
+						{
+							"key": "height",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "rollback - success",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/rollback?height=1",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"rollback"
+							],
+							"query": [
+								{
+									"key": "height",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": null,
+					"header": [
+						{
+							"key": "Date",
+							"value": "Thu, 09 Oct 2025 04:57:57 GMT"
+						},
+						{
+							"key": "Content-Length",
+							"value": "0"
+						}
+					],
+					"cookie": [],
+					"body": null
+				},
+				{
+					"name": "rollback - invalid future height",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/rollback?height=10",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"rollback"
+							],
+							"query": [
+								{
+									"key": "height",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": null,
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 09 Oct 2025 04:58:10 GMT"
+						},
+						{
+							"key": "Content-Length",
+							"value": "80"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"code\": \"INVALID_HEIGHT\",\n    \"error\": \"Target height is greater than current height\"\n}"
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "BASE_URL",
+			"value": ""
+		},
+		{
+			"key": "height",
+			"value": ""
+		}
+	]
+}
