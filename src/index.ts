@@ -1,67 +1,26 @@
-import Fastify from "fastify";
-import { Pool } from "pg";
-import { randomUUID } from "crypto";
-
-const fastify = Fastify({ logger: true });
-
-fastify.get("/", async (request, reply) => {
-  return { hello: "world" };
-});
-
-async function testPostgres(pool: Pool) {
-  const id = randomUUID();
-  const name = "Satoshi";
-  const email = "Nakamoto";
-
-  await pool.query(`DELETE FROM users;`);
-
-  await pool.query(
-    `
-    INSERT INTO users (id, name, email)
-    VALUES ($1, $2, $3);
-  `,
-    [id, name, email],
-  );
-
-  const { rows } = await pool.query(`
-    SELECT * FROM users;
-  `);
-
-  console.log("USERS", rows);
-}
-
-async function createTables(pool: Pool) {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS users (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      email TEXT NOT NULL
-    );
-  `);
-}
+import * as Postgress from "./infra/database/postgress";
+import { logger } from "./infra/logger";
+import { App } from "./app";
 
 async function bootstrap() {
-  console.log("Bootstrapping...");
-  const databaseUrl = process.env.DATABASE_URL;
-  if (!databaseUrl) {
-    throw new Error("DATABASE_URL is required");
-  }
+  logger.info("[bootstrap] Bootstrapping...");
+  const pool = await Postgress.PoolSingleton.getPool();
 
-  const pool = new Pool({
-    connectionString: databaseUrl,
-  });
+  logger.info("[bootstrap] dropping all tables...");
+  await Postgress.dropAllTables(pool);
 
-  await createTables(pool);
-  await testPostgres(pool);
+  logger.info("[bootstrap] initialize table...");
+  await Postgress.initTables(pool);
 }
 
 try {
-  await bootstrap();
-  await fastify.listen({
-    port: 3000,
-    host: "0.0.0.0",
-  });
+  if (process.env.NODE_ENV !== "test") {
+    await bootstrap();
+  }
+  const app = new App();
+  await app.init();
+  await app.start();
 } catch (err) {
-  fastify.log.error(err);
+  logger.error(err);
   process.exit(1);
 }
